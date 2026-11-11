@@ -5,6 +5,7 @@
 // Node 20+, no dependencies.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 // A sailing counts toward "when did the lowest price appear" only if we watched it
 // from at least this many days out; otherwise a lower price may have come before we started.
@@ -149,6 +150,7 @@ function writeShip(ship, rows) {
   console.log(`${ship.name}: ${sailings.length} sailings analysed -> ${dir}/`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run only when started directly (works on Windows, macOS and Linux paths).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   for (const ship of config.ships) writeShip(ship, loadRows(ship.slug));
 }

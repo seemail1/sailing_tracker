@@ -4,6 +4,7 @@
 // Node 20+, no dependencies.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 const DELAY_MS = 3000;            // pause between requests, to be polite
 const RETRY_DELAY_MS = 15000;
@@ -114,4 +115,5 @@ async function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+// Run only when started directly (works on Windows, macOS and Linux paths).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
