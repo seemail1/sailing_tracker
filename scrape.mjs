@@ -53,6 +53,8 @@ async function fetchPage(url) {
         signal: AbortSignal.timeout(30000),
       });
       if (res.status === 404) return { status: "not_found" };
+      // Blocked or rate-limited: don't retry, so a blocked run ends quickly.
+      if (res.status === 429 || res.status === 403) return { status: `blocked: HTTP ${res.status}`, blocked: true };
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return { html: await res.text() };
     } catch (err) {
@@ -69,7 +71,7 @@ function readCsv(path) {
 }
 
 async function main() {
-  let attempted = 0, priced = 0;
+  let attempted = 0, priced = 0, blockedInARow = 0;
   for (const ship of config.ships) {
     if (onlyShip && ship.slug !== onlyShip) continue;
     const dir = `data/${ship.slug}`;
@@ -87,15 +89,21 @@ async function main() {
       const result = page.html ? parsePrice(page.html) : { status: page.status };
       attempted++;
       if (result.status === "ok") priced++;
+      blockedInARow = page.blocked ? blockedInARow + 1 : 0;
       rows.push([
         today, s.date, s.nights, daysBetween(today, s.date),
         result.price ?? "", result.perNight ?? "", result.status, url,
       ]);
       console.log(`  ${s.date} (${s.nights}n): ${result.status === "ok" ? "$" + result.price : result.status}`);
+      if (blockedInARow >= 3) break;
       await sleep(DELAY_MS);
     }
     rows.sort((a, b) => (a[1] + a[0]).localeCompare(b[1] + b[0]));
     writeFileSync(path, [HEADER, ...rows].map((r) => r.join(",")).join("\n") + "\n");
+    if (blockedInARow >= 3) {
+      console.error("\nThe site refused 3 requests in a row (HTTP 429/403). Stopping this run.");
+      process.exit(1);
+    }
   }
   console.log(`\nPriced ${priced} of ${attempted} sailings.`);
   // Fail the run (so GitHub emails you) if most pages could not be read:
