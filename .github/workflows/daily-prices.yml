@@ -1,0 +1,40 @@
+name: Daily cruise prices
+
+on:
+  schedule:
+    - cron: "17 10 * * *"   # 10:17 UTC = 5:17 a.m. Toronto (EST), 6:17 a.m. (EDT)
+  workflow_dispatch:        # adds a "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write           # lets the job commit the new data back to the repo
+
+concurrency:
+  group: daily-prices
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Collect today's prices
+        run: node scrape.mjs
+
+      - name: Update results
+        if: always()
+        run: node analyze.mjs
+
+      - name: Save data to the repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data results
+          git diff --cached --quiet || git commit -m "Prices for $(date -u +%F)"
+          git push
