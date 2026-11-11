@@ -26,7 +26,7 @@ const pct = (x) => (x == null ? "–" : `${(x * 100).toFixed(1)}%`);
 const usd = (x) => (x == null ? "–" : `$${Math.round(x).toLocaleString("en-US")}`);
 
 const config = JSON.parse(readFileSync(new URL("./ships.json", import.meta.url)));
-const today = new Date().toISOString().slice(0, 10);
+const today = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
 
 function loadRows(slug) {
   const path = `data/${slug}/prices.csv`;

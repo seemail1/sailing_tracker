@@ -15,7 +15,7 @@ const HEADER = [
 ];
 
 const config = JSON.parse(readFileSync(new URL("./ships.json", import.meta.url)));
-const today = new Date().toISOString().slice(0, 10); // UTC date
+const today = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
 const onlyShip = process.argv[2]; // optional: node scrape.mjs icon-of-the-seas
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
