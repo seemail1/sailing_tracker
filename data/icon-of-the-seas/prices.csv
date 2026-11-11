@@ -1,4 +1,0 @@
-scrape_date,sail_date,nights,days_before,inside_price_usd,price_per_night_usd,status,url
-2026-11-11,2026-11-14,7,3,,,blocked: HTTP 429,https://gangwaze.com/cruise-lines/royal-caribbean/icon-of-the-seas/2026-11-14/7-nights
-2026-11-11,2026-11-21,7,10,,,blocked: HTTP 429,https://gangwaze.com/cruise-lines/royal-caribbean/icon-of-the-seas/2026-11-21/7-nights
-2026-11-11,2026-11-28,7,17,,,blocked: HTTP 429,https://gangwaze.com/cruise-lines/royal-caribbean/icon-of-the-seas/2026-11-28/7-nights
